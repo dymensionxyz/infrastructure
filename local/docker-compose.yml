@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  hub-validator-1:
+    container_name: hub-validator-1
+    image: dymensionxyz/dymension
+    ports:
+      - "26657:26657"
+      - "1317:1317"
+      - "9090:9090"
+    environment:
+      - MONIKER_NAME=hub-validator-1
+      - IS_GENESIS_VALIDATOR=true # only set this to true for one validator which is in charge of creating the genesis file
+      - VALIDATOR_COUNT=2
+    volumes:
+      - hub:/home/shared
+      - ./hub-entrypoint.sh:/hub-entrypoint.sh
+    entrypoint: sh -c /hub-entrypoint.sh
+  hub-validator-2:
+    container_name: hub-validator-2
+    image: dymensionxyz/dymension
+    ports:
+      - "26658:26657"
+      - "1318:1317"
+      - "9091:9090"
+    environment:
+      - MONIKER_NAME=hub-validator-2
+    volumes:
+      - hub:/home/shared
+      - ./hub-entrypoint.sh:/hub-entrypoint.sh
+    entrypoint: sh -c /hub-entrypoint.sh
+
+volumes:
+  hub:
