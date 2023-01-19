@@ -5,6 +5,8 @@ set -e
 TOKEN_AMOUNT=${TOKEN_AMOUNT:-1000000000000000000000urap}
 STAKING_AMOUNT=${STAKING_AMOUNT:-500000000000000000000urap}
 KEY_NAME=${KEY_NAME:-local-user}
+ROLLAPP_ID=${ROLLAPP_ID:-rollapp}
+DYMENSION_CHAIN_ID=${DYMENSION_CHAIN_ID:-dymension}
 
 CHAIN_DIR="$HOME/.rollapp"
 CONFIG_DIRECTORY="$CHAIN_DIR/config"
@@ -26,6 +28,7 @@ init_chain() {
     # Init the chain
     $EXECUTABLE init "$MONIKER_NAME" --chain-id="$CHAIN_ID"
     $EXECUTABLE dymint unsafe-reset-all
+    $EXECUTABLE keys add "$KEY_NAME" --keyring-backend test
 
     # ------------------------------- client config ------------------------------ #
     sed -i'' -e "s/^chain-id *= .*/chain-id = \"$CHAIN_ID\"/" "$CLIENT_CONFIG_FILE"
@@ -40,7 +43,6 @@ init_chain() {
 
 create_genesis() {
     # Import the key for the genesis sequencer as it was funded by the hub already
-    echo '12345678' | $EXECUTABLE keys import $KEY_NAME /sequencer-hub.pk --keyring-backend test
     $EXECUTABLE add-genesis-account "$KEY_NAME" "$TOKEN_AMOUNT" --keyring-backend test
     $EXECUTABLE gentx "$KEY_NAME" "$STAKING_AMOUNT" --chain-id "$CHAIN_ID" --keyring-backend test
     $EXECUTABLE collect-gentxs
@@ -48,7 +50,6 @@ create_genesis() {
 }
 
 wait_for_genesis() { 
-    $EXECUTABLE keys add "$KEY_NAME" --keyring-backend test
     while [ ! -f /home/shared/gentx/genesis.json ]; do
         echo "Waiting for genesis file"
         sleep 1
@@ -81,11 +82,44 @@ add_peers_to_config() {
     sed -i "s/,\"/\"/g" ~/.rollapp/config/config.toml
 }
 
+import_dym_key() {
+    echo '12345678' | dymd keys import $KEY_NAME_DYM /sequencer-hub.pk --keyring-backend test
+}
+
+register_rollapp_to_hub() {
+    echo "Registering Rollapp to Hub"
+    dymd tx rollapp create-rollapp "$ROLLAPP_ID" stamp1 "genesis-path/1" 3 100 '{"Addresses":[]}' \
+    --from "$KEY_NAME_DYM" \
+    --keyring-backend test \
+    --node "tcp://$SETTLEMENT_RPC" \
+    --chain-id "$HUB_CHAIN_ID" \
+    --broadcast-mode block \
+    --yes
+}
+
+register_sequencer_to_hub() {
+    echo "Registering Sequencer to Hub"
+    #Register Sequencer
+    DESCRIPTION="{\"Moniker\":\"$MONIKER_NAME\",\"Identity\":\"\",\"Website\":\"\",\"SecurityContact\":\"\",\"Details\":\"\"}";
+    SEQ_PUB_KEY="$($EXECUTABLE dymint show-sequencer)"
+
+    dymd tx sequencer create-sequencer "$SEQ_PUB_KEY" "$ROLLAPP_ID" "$DESCRIPTION" \
+    --from "$KEY_NAME_DYM" \
+    --keyring-backend test \
+    --node "tcp://$SETTLEMENT_RPC" \
+    --chain-id "$HUB_CHAIN_ID" \
+    --broadcast-mode block \
+    --yes
+}
+
 main() {
     init_directories
     init_chain
     if [ "$IS_GENESIS_SEQUENCER" = "true" ]; then
         create_genesis
+        import_dym_key
+        register_rollapp_to_hub
+        register_sequencer_to_hub
     else
         wait_for_genesis
     fi

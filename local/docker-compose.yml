@@ -11,11 +11,18 @@ services:
       - MONIKER_NAME=hub-validator-1
       - IS_GENESIS_VALIDATOR=true # only set this to true for one validator which is in charge of creating the genesis file
       - VALIDATOR_COUNT=2
+      - CHAIN_ID=hub
     volumes:
       - hub:/home/shared
       - ./hub-entrypoint.sh:/hub-entrypoint.sh
       - ./sequencer-hub.pk:/sequencer-hub.pk
     entrypoint: sh -c /hub-entrypoint.sh
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:26657"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
   hub-validator-2:
     container_name: hub-validator-2
     image: dymensionxyz/dymension
@@ -26,6 +33,7 @@ services:
     environment:
       - MONIKER_NAME=hub-validator-2
       - VALIDATOR_COUNT=2
+      - CHAIN_ID=hub
     volumes:
       - hub:/home/shared
       - ./hub-entrypoint.sh:/hub-entrypoint.sh
@@ -40,17 +48,26 @@ services:
       - "9092:9090"
     environment:
       - MONIKER_NAME=rollapp-a-sequencer
-      - IS_GENESIS_SEQUENCER=true # only set this to true for one validator which is in charge of creating the genesis file
+      - CHAIN_ID=rollapp
+      - IS_GENESIS_SEQUENCER=true # only set this to true for one sequencer which is in charge of creating the genesis file
       - NODE_COUNT=1
       - AGGREGATOR=true
       - DA_LAYER=mock
       - DA_LAYER_CONFIG=30000ms
-      - SETTLEMENT_LAYER=mock
+      - SETTLEMENT_LAYER=dymension
+      - SETTLEMENT_RPC=hub-validator-1:26657
+      - HUB_CHAIN_ID=hub
+      - KEY_NAME_DYM=dym-user
+      - BATCH_SIZE=50
     volumes:
       - rollapp-a:/home/shared
       - ./rollapp-entrypoint.sh:/rollapp-entrypoint.sh
       - ./sequencer-hub.pk:/sequencer-hub.pk
     entrypoint: bash -c /rollapp-entrypoint.sh
+    depends_on:
+      hub-validator-1:
+        condition: service_healthy
+
 
 volumes:
   hub:
