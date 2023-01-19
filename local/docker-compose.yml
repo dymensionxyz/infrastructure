@@ -14,6 +14,7 @@ services:
     volumes:
       - hub:/home/shared
       - ./hub-entrypoint.sh:/hub-entrypoint.sh
+      - ./sequencer-hub.pk:/sequencer-hub.pk
     entrypoint: sh -c /hub-entrypoint.sh
   hub-validator-2:
     container_name: hub-validator-2

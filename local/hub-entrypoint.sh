@@ -36,7 +36,11 @@ create_genesis() {
         echo "Adding $VALIDATOR_ACCOUNT to genesis file"
         dymd add-genesis-account $VALIDATOR_ACCOUNT 100000000000dym
     done
-    # Create genesis file by collecting all the gentx files
+
+    echo "Adding sequencer account to genesis file"
+    echo '12345678' | dymd keys import sequencer-1 /sequencer-hub.pk --keyring-backend test
+    dymd add-genesis-account $(dymd keys show sequencer-1 -a --keyring-backend test) 100000000000dym
+
     echo "All accounts added. Creating genesis file and copying to shared volume"
     dymd collect-gentxs --gentx-dir /home/shared/gentx
     cp ~/.dymension/config/genesis.json /home/shared/gentx/
