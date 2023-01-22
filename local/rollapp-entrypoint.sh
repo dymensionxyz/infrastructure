@@ -5,8 +5,8 @@ set -e
 TOKEN_AMOUNT=${TOKEN_AMOUNT:-1000000000000000000000urap}
 STAKING_AMOUNT=${STAKING_AMOUNT:-500000000000000000000urap}
 KEY_NAME=${KEY_NAME:-local-user}
-ROLLAPP_ID=${ROLLAPP_ID:-rollapp}
 DYMENSION_CHAIN_ID=${DYMENSION_CHAIN_ID:-dymension}
+ROLLAPP_ID=${ROLLAPP_ID:-rollapp}
 
 CHAIN_DIR="$HOME/.rollapp"
 CONFIG_DIRECTORY="$CHAIN_DIR/config"
@@ -126,6 +126,7 @@ main() {
     create_peer_address
     wait_for_all_peer_addresses
     add_peers_to_config
+    sleep 10000
     sh /app/scripts/run_rollapp.sh
 }
 

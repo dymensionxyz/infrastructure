@@ -2,7 +2,7 @@ version: "3.9"
 services:
   hub-validator-1:
     container_name: hub-validator-1
-    image: dymensionxyz/dymension
+    image: ghcr.io/dymensionxyz/dymension:latest
     ports:
       - "26657:26657"
       - "1317:1317"
@@ -19,10 +19,10 @@ services:
     entrypoint: sh -c /hub-entrypoint.sh
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:26657"]
-      interval: 10s
+      interval: 15s
       timeout: 5s
       retries: 3
-      start_period: 5s
+      start_period: 60s
   hub-validator-2:
     container_name: hub-validator-2
     image: dymensionxyz/dymension
@@ -41,24 +41,27 @@ services:
 
   rollapp-a-sequencer:
     container_name: rollapp-a-sequencer
-    image: dymensionxyz/rollapp
+    image: ghcr.io/dymensionxyz/dymension-rdk:latest
     ports:
       - "26659:26657"
       - "1319:1317"
       - "9092:9090"
     environment:
       - MONIKER_NAME=rollapp-a-sequencer
-      - CHAIN_ID=rollapp
+      - CHAIN_ID=rollapp-a # this is the chain id of the rollup chain
+      - ROLLAPP_ID=rollapp-a # this is the rollapp id in the hub chain
       - IS_GENESIS_SEQUENCER=true # only set this to true for one sequencer which is in charge of creating the genesis file
       - NODE_COUNT=1
       - AGGREGATOR=true
-      - DA_LAYER=mock
-      - DA_LAYER_CONFIG=30000ms
       - SETTLEMENT_LAYER=dymension
       - SETTLEMENT_RPC=hub-validator-1:26657
       - HUB_CHAIN_ID=hub
       - KEY_NAME_DYM=dym-user
-      - BATCH_SIZE=50
+      - BATCH_SIZE=5
+      - BLOCK_TIME=2s
+      - DA_LAYER=celestia
+      - DA_LC_ENDPOINT=34.201.203.215:26659
+      - DA_NAMESPACE_ID=[1,2,3,4,5,6,255,255]
     volumes:
       - rollapp-a:/home/shared
       - ./rollapp-entrypoint.sh:/rollapp-entrypoint.sh
@@ -68,19 +71,19 @@ services:
       hub-validator-1:
         condition: service_healthy
 
-  celestia-light-node:
-    container_name: celestia-light-node
-    image: ghcr.io/dymensionxyz/dockers/celestia-light-client:v0.6.2
-    ports:
-      - "26659:26659"
-      - "9099:9090"
-    volumes:
-      - ./celestia-light-client.pk:/celestia-light-client.pk
-      - ./cld-entrypoint.sh:/cld-entrypoint.sh
-    entrypoint: /bin/sh -c /cld-entrypoint.sh
-    # Increase the number of open files otherwise the light client will crash due to too many open files (p2p conenctions)
-    ulimits:
-      nproc: 65535
+  # celestia-light-node:
+  #   container_name: celestia-light-node
+  #   image: ghcr.io/dymensionxyz/dockers/celestia-light-client:v0.6.2
+  #   ports:
+  #     - "26659:26659"
+  #     - "9099:9090"
+  #   volumes:
+  #     - ./celestia-light-client.pk:/celestia-light-client.pk
+  #     - ./cld-entrypoint.sh:/cld-entrypoint.sh
+  #   entrypoint: /bin/sh -c /cld-entrypoint.sh
+  #   # Increase the number of open files otherwise the light client will crash due to too many open files (p2p conenctions)
+  #   ulimits:
+  #     nproc: 65535
 
 volumes:
   hub:
