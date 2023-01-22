@@ -68,6 +68,19 @@ services:
       hub-validator-1:
         condition: service_healthy
 
+  celestia-light-node:
+    container_name: celestia-light-node
+    image: ghcr.io/dymensionxyz/dockers/celestia-light-client:v0.6.2
+    ports:
+      - "26659:26659"
+      - "9099:9090"
+    volumes:
+      - ./celestia-light-client.pk:/celestia-light-client.pk
+      - ./cld-entrypoint.sh:/cld-entrypoint.sh
+    entrypoint: /bin/sh -c /cld-entrypoint.sh
+    # Increase the number of open files otherwise the light client will crash due to too many open files (p2p conenctions)
+    ulimits:
+      nproc: 65535
 
 volumes:
   hub:
