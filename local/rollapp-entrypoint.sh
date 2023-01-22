@@ -59,7 +59,7 @@ wait_for_genesis() {
 }
 
 create_peer_address() {
-    PEER_ADDRESS=$($EXECUTABLE dymint show-node-id)@$HOSTNAME:26656
+    PEER_ADDRESS=$($EXECUTABLE dymint show-node-id)@$(hostname -i):26656
     echo $PEER_ADDRESS > /home/shared/peers/$HOSTNAME
 }
 
@@ -70,16 +70,17 @@ wait_for_all_peer_addresses() {
     done
 }
 
-add_peers_to_config() {
-    # Once all peers are present, add them to the config.toml file
-    echo "All peers present. Adding them to config.toml"
+add_peers_to_variable() {
+    # Once all peers are present, contact them and add them to the variable
+    echo "All peers present. Adding them to variable"
     for file in /home/shared/peers/*; do
-        echo "Adding $(cat $file) to config.toml"
-        sed -i "s/persistent_peers = \"\"/persistent_peers = \"$(cat $file),\"/g" ~/.rollapp/config/config.toml
+        echo "Adding $(cat $file) to variable"
+        P2P_SEEDS="$P2P_SEEDS,$(cat $file)"
     done
-
-    # Remove the last comma from the persistent peers
-    sed -i "s/,\"/\"/g" ~/.rollapp/config/config.toml
+    # Remove the first comma from the persistent peers
+    P2P_SEEDS=${P2P_SEEDS:1}
+    # Add the p2p seeds to the shared var script
+    echo "P2P_SEEDS=$P2P_SEEDS" >> /app/scripts/shared.sh
 }
 
 import_dym_key() {
@@ -125,8 +126,7 @@ main() {
     fi
     create_peer_address
     wait_for_all_peer_addresses
-    add_peers_to_config
-    sleep 10000
+    add_peers_to_variable
     sh /app/scripts/run_rollapp.sh
 }
 

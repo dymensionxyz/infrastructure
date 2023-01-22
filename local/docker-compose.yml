@@ -51,14 +51,16 @@ services:
       - CHAIN_ID=rollapp-a # this is the chain id of the rollup chain
       - ROLLAPP_ID=rollapp-a # this is the rollapp id in the hub chain
       - IS_GENESIS_SEQUENCER=true # only set this to true for one sequencer which is in charge of creating the genesis file
-      - NODE_COUNT=1
+      - NODE_COUNT=2
       - AGGREGATOR=true
       - SETTLEMENT_LAYER=dymension
       - SETTLEMENT_RPC=hub-validator-1:26657
       - HUB_CHAIN_ID=hub
       - KEY_NAME_DYM=dym-user
-      - BATCH_SIZE=5
+      - BATCH_SIZE=150
       - BLOCK_TIME=2s
+      - RPC_LADDRESS=0.0.0.0:26657
+      - P2P_LADDRESS=0.0.0.0:26656
       - DA_LAYER=celestia
       - DA_LC_ENDPOINT=34.201.203.215:26659
       - DA_NAMESPACE_ID=[1,2,3,4,5,6,255,255]
@@ -66,6 +68,35 @@ services:
       - rollapp-a:/home/shared
       - ./rollapp-entrypoint.sh:/rollapp-entrypoint.sh
       - ./sequencer-hub.pk:/sequencer-hub.pk
+    entrypoint: bash -c /rollapp-entrypoint.sh
+    depends_on:
+      hub-validator-1:
+        condition: service_healthy
+
+  rollapp-a-full-node:
+    container_name: rollapp-a-full-node
+    image: ghcr.io/dymensionxyz/dymension-rdk:latest
+    ports:
+      - "26660:26657"
+      - "1320:1317"
+      - "9093:9090"
+    environment:
+      - MONIKER_NAME=rollapp-a-full-node
+      - CHAIN_ID=rollapp-a # this is the chain id of the rollup chain
+      - ROLLAPP_ID=rollapp-a # this is the rollapp id in the hub chain
+      - IS_GENESIS_SEQUENCER=false # only set this to true for one sequencer which is in charge of creating the genesis file
+      - NODE_COUNT=2
+      - AGGREGATOR=false
+      - SETTLEMENT_LAYER=dymension
+      - SETTLEMENT_RPC=hub-validator-1:26657
+      - RPC_LADDRESS=0.0.0.0:26657
+      - P2P_LADDRESS=0.0.0.0:26656
+      - DA_LAYER=celestia
+      - DA_LC_ENDPOINT=34.201.203.215:26659
+      - DA_NAMESPACE_ID=[1,2,3,4,5,6,255,255]
+    volumes:
+      - rollapp-a:/home/shared
+      - ./rollapp-entrypoint.sh:/rollapp-entrypoint.sh
     entrypoint: bash -c /rollapp-entrypoint.sh
     depends_on:
       hub-validator-1:
