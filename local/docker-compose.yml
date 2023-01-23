@@ -12,12 +12,11 @@ services:
       - MONIKER_NAME=hub-validator-1
       - IS_GENESIS_VALIDATOR=true # only set this to true for one validator which is in charge of creating the genesis file
       - VALIDATOR_COUNT=2
+      - NUM_ADDRESSES_TO_FUND=2
       - CHAIN_ID=hub
     volumes:
       - hub:/home/shared
       - ./hub-entrypoint.sh:/hub-entrypoint.sh
-      - ./sequencer-a-hub.pk:/sequencer-a-hub.pk
-      - ./sequencer-b-hub.pk:/sequencer-b-hub.pk
     entrypoint: sh -c /hub-entrypoint.sh
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:26657"]
@@ -66,13 +65,10 @@ services:
       - DA_LC_ENDPOINT=34.201.203.215:26659
       - DA_NAMESPACE_ID=[1,2,3,4,5,6,255,255]
     volumes:
+      - hub:/home/hub
       - rollapp-a:/home/shared
       - ./rollapp-entrypoint.sh:/rollapp-entrypoint.sh
-      - ./sequencer-a-hub.pk:/sequencer-hub.pk
     entrypoint: bash -c /rollapp-entrypoint.sh
-    depends_on:
-      hub-validator-1:
-        condition: service_healthy
 
   rollapp-a-full-node:
     container_name: rollapp-a-full-node
@@ -97,9 +93,6 @@ services:
       - rollapp-a:/home/shared
       - ./rollapp-entrypoint.sh:/rollapp-entrypoint.sh
     entrypoint: bash -c /rollapp-entrypoint.sh
-    depends_on:
-      hub-validator-1:
-        condition: service_healthy
 
   rollapp-b-sequencer:
     container_name: rollapp-b-sequencer
@@ -125,13 +118,10 @@ services:
       - DA_LC_ENDPOINT=34.201.203.215:26659
       - DA_NAMESPACE_ID=[2,2,3,4,5,6,255,255]
     volumes:
+      - hub:/home/hub
       - rollapp-b:/home/shared
       - ./rollapp-entrypoint.sh:/rollapp-entrypoint.sh
-      - ./sequencer-b-hub.pk:/sequencer-hub.pk
     entrypoint: bash -c /rollapp-entrypoint.sh
-    depends_on:
-      hub-validator-1:
-        condition: service_healthy
 
   rollapp-b-full-node:
     container_name: rollapp-b-full-node
@@ -156,9 +146,6 @@ services:
       - rollapp-b:/home/shared
       - ./rollapp-entrypoint.sh:/rollapp-entrypoint.sh
     entrypoint: bash -c /rollapp-entrypoint.sh
-    depends_on:
-      hub-validator-1:
-        condition: service_healthy
 
   # celestia-light-node:
   #   container_name: celestia-light-node

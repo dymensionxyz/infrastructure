@@ -1,9 +1,0 @@
------BEGIN TENDERMINT PRIVATE KEY-----
-kdf: bcrypt
-salt: 11731AFC35ED9A0BFEA15868D7EFC203
-type: secp256k1
-
-ahLNKxOAfCyxnjl9mCA5WRmdifDcElEqo4IwBdwqH7bppwOpn7AEVpfT838qMSCb
-bqirxSYtdALd8ZEMxgZLsemnuG+HqVuH5hrcf18=
-=iO1u
------END TENDERMINT PRIVATE KEY-----

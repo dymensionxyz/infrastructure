@@ -17,6 +17,7 @@ API_ADDRESS=${API_ADDRESS:-"0.0.0.0:1317"}
 init_directories() {
     mkdir -p /home/shared/gentx
     mkdir -p /home/shared/peers
+    mkdir -p /home/shared/addresses-to-fund
 }
 
 init_chain() {
@@ -42,6 +43,20 @@ init_chain() {
     sed -i'' -e "/\[api\]/,+9 s/address *= .*/address = \"tcp:\/\/$API_ADDRESS\"/" "$APP_CONFIG_FILE"
 }
 
+add_genesis_accounts_from_external_keys() {
+    # Wait for all the addresses to be present
+    while [ $(ls /home/shared/addresses-to-fund | wc -l) -ne $NUM_ADDRESSES_TO_FUND ]; do
+        echo "Waiting for all addresses to be present"
+        sleep 1
+    done
+    # Add genesis accounts from external keys
+    for file in /home/shared/addresses-to-fund/*; do
+        ACCOUNT_ADDRESS=$(cat $file)
+        echo "Adding $file key with address $ACCOUNT_ADDRESS to genesis file"
+        dymd add-genesis-account $ACCOUNT_ADDRESS 100000000000udym
+    done
+}
+
 create_genesis() {
     # Get validator count from environment variable and subtract 1 (genesis validator)
     VALIDATOR_COUNT=$(($VALIDATOR_COUNT - 1))
@@ -57,13 +72,8 @@ create_genesis() {
         dymd add-genesis-account $VALIDATOR_ACCOUNT 100000000000udym
     done
 
-    echo "Adding sequencer a account to genesis file"
-    echo '12345678' | dymd keys import sequencer-a /sequencer-a-hub.pk --keyring-backend test
-    dymd add-genesis-account $(dymd keys show sequencer-a -a --keyring-backend test) 100000000000udym
-
-    echo "Adding sequencer b account to genesis file"
-    echo '12345678' | dymd keys import sequencer-b /sequencer-b-hub.pk --keyring-backend test
-    dymd add-genesis-account $(dymd keys show sequencer-b -a --keyring-backend test) 100000000000udym
+    echo "Adding genesis accounts from external addresses"
+    add_genesis_accounts_from_external_keys
 
     echo "All accounts added. Creating genesis file and copying to shared volume"
     dymd collect-gentxs --gentx-dir /home/shared/gentx
