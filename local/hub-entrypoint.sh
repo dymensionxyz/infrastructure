@@ -12,6 +12,7 @@ RPC_ADDRESS=${RPC_ADDRESS:-0.0.0.0:26657}
 P2P_ADDRESS=${P2P_ADDRESS:-0.0.0.0:26656}
 GRPC_ADDRESS=${GRPC_ADDRESS:-0.0.0.0:9090}
 GRPC_WEB_ADDRESS=${GRPC_WEB_ADDRESS:-0.0.0.0:9091}
+API_ADDRESS=${API_ADDRESS:-"0.0.0.0:1317"}
 
 init_directories() {
     mkdir -p /home/shared/gentx
@@ -37,6 +38,8 @@ init_chain() {
     sed -i'' -e 's/bond_denom": ".*"/bond_denom": "udym"/' "$GENESIS_FILE"
     sed -i'' -e 's/mint_denom": ".*"/mint_denom": "udym"/' "$GENESIS_FILE"
     sed -i'' -e 's/^minimum-gas-prices *= .*/minimum-gas-prices = "0udym"/' "$APP_CONFIG_FILE"
+    sed -i'' -e '/\[api\]/,+3 s/enable *= .*/enable = true/' "$APP_CONFIG_FILE"
+    sed -i'' -e "/\[api\]/,+9 s/address *= .*/address = \"tcp:\/\/$API_ADDRESS\"/" "$APP_CONFIG_FILE"
 }
 
 create_genesis() {
