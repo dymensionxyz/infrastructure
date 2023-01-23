@@ -1,5 +1,6 @@
 version: "3.9"
 services:
+
   hub-validator-1:
     container_name: hub-validator-1
     image: ghcr.io/dymensionxyz/dymension:latest
@@ -15,7 +16,8 @@ services:
     volumes:
       - hub:/home/shared
       - ./hub-entrypoint.sh:/hub-entrypoint.sh
-      - ./sequencer-hub.pk:/sequencer-hub.pk
+      - ./sequencer-a-hub.pk:/sequencer-a-hub.pk
+      - ./sequencer-b-hub.pk:/sequencer-b-hub.pk
     entrypoint: sh -c /hub-entrypoint.sh
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:26657"]
@@ -23,6 +25,7 @@ services:
       timeout: 5s
       retries: 3
       start_period: 60s
+
   hub-validator-2:
     container_name: hub-validator-2
     image: dymensionxyz/dymension
@@ -57,7 +60,7 @@ services:
       - SETTLEMENT_RPC=hub-validator-1:26657
       - HUB_CHAIN_ID=hub
       - KEY_NAME_DYM=dym-user
-      - BATCH_SIZE=150
+      - BATCH_SIZE=20
       - BLOCK_TIME=2s
       - RPC_LADDRESS=0.0.0.0:26657
       - P2P_LADDRESS=0.0.0.0:26656
@@ -67,7 +70,7 @@ services:
     volumes:
       - rollapp-a:/home/shared
       - ./rollapp-entrypoint.sh:/rollapp-entrypoint.sh
-      - ./sequencer-hub.pk:/sequencer-hub.pk
+      - ./sequencer-a-hub.pk:/sequencer-hub.pk
     entrypoint: bash -c /rollapp-entrypoint.sh
     depends_on:
       hub-validator-1:
@@ -102,6 +105,69 @@ services:
       hub-validator-1:
         condition: service_healthy
 
+  rollapp-b-sequencer:
+    container_name: rollapp-b-sequencer
+    image: ghcr.io/dymensionxyz/dymension-rdk:latest
+    ports:
+      - "26661:26657"
+      - "1321:1317"
+      - "9094:9090"
+    environment:
+      - MONIKER_NAME=rollapp-b-sequencer
+      - CHAIN_ID=rollapp-b # this is the chain id of the rollup chain
+      - ROLLAPP_ID=rollapp-b # this is the rollapp id in the hub chain
+      - IS_GENESIS_SEQUENCER=true # only set this to true for one sequencer which is in charge of creating the genesis file
+      - NODE_COUNT=2
+      - AGGREGATOR=true
+      - SETTLEMENT_LAYER=dymension
+      - SETTLEMENT_RPC=hub-validator-1:26657
+      - HUB_CHAIN_ID=hub
+      - KEY_NAME_DYM=dym-user
+      - BATCH_SIZE=150
+      - BLOCK_TIME=2s
+      - RPC_LADDRESS=0.0.0.0:26657
+      - P2P_LADDRESS=0.0.0.0:26656
+      - DA_LAYER=celestia
+      - DA_LC_ENDPOINT=34.201.203.215:26659
+      - DA_NAMESPACE_ID=[2,2,3,4,5,6,255,255]
+    volumes:
+      - rollapp-b:/home/shared
+      - ./rollapp-entrypoint.sh:/rollapp-entrypoint.sh
+      - ./sequencer-b-hub.pk:/sequencer-hub.pk
+    entrypoint: bash -c /rollapp-entrypoint.sh
+    depends_on:
+      hub-validator-1:
+        condition: service_healthy
+
+  rollapp-b-full-node:
+    container_name: rollapp-b-full-node
+    image: ghcr.io/dymensionxyz/dymension-rdk:latest
+    ports:
+      - "26662:26657"
+      - "1322:1317"
+      - "9095:9090"
+    environment:
+      - MONIKER_NAME=rollapp-b-full-node
+      - CHAIN_ID=rollapp-b # this is the chain id of the rollup chain
+      - ROLLAPP_ID=rollapp-b # this is the rollapp id in the hub chain
+      - IS_GENESIS_SEQUENCER=false # only set this to true for one sequencer which is in charge of creating the genesis file
+      - NODE_COUNT=2
+      - AGGREGATOR=false
+      - SETTLEMENT_LAYER=dymension
+      - SETTLEMENT_RPC=hub-validator-1:26657
+      - RPC_LADDRESS=0.0.0.0:26657
+      - P2P_LADDRESS=0.0.0.0:26656
+      - DA_LAYER=celestia
+      - DA_LC_ENDPOINT=34.201.203.215:26659
+      - DA_NAMESPACE_ID=[2,2,3,4,5,6,255,255]
+    volumes:
+      - rollapp-b:/home/shared
+      - ./rollapp-entrypoint.sh:/rollapp-entrypoint.sh
+    entrypoint: bash -c /rollapp-entrypoint.sh
+    depends_on:
+      hub-validator-1:
+        condition: service_healthy
+
   # celestia-light-node:
   #   container_name: celestia-light-node
   #   image: ghcr.io/dymensionxyz/dockers/celestia-light-client:v0.6.2
@@ -119,3 +185,4 @@ services:
 volumes:
   hub:
   rollapp-a:
+  rollapp-b:

@@ -53,9 +53,13 @@ create_genesis() {
         dymd add-genesis-account $VALIDATOR_ACCOUNT 100000000000dym
     done
 
-    echo "Adding sequencer account to genesis file"
-    echo '12345678' | dymd keys import sequencer-1 /sequencer-hub.pk --keyring-backend test
-    dymd add-genesis-account $(dymd keys show sequencer-1 -a --keyring-backend test) 100000000000dym
+    echo "Adding sequencer a account to genesis file"
+    echo '12345678' | dymd keys import sequencer-a /sequencer-a-hub.pk --keyring-backend test
+    dymd add-genesis-account $(dymd keys show sequencer-a -a --keyring-backend test) 100000000000dym
+
+    echo "Adding sequencer b account to genesis file"
+    echo '12345678' | dymd keys import sequencer-b /sequencer-b-hub.pk --keyring-backend test
+    dymd add-genesis-account $(dymd keys show sequencer-b -a --keyring-backend test) 100000000000dym
 
     echo "All accounts added. Creating genesis file and copying to shared volume"
     dymd collect-gentxs --gentx-dir /home/shared/gentx
