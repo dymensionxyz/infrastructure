@@ -23,8 +23,8 @@ init_chain() {
     dymd init "$MONIKER_NAME" --chain-id="$CHAIN_ID"
     dymd tendermint unsafe-reset-all
     dymd keys add "$KEY_NAME" --keyring-backend test
-    dymd add-genesis-account "$(dymd keys show "$KEY_NAME" -a --keyring-backend test)" 100000000000dym
-    dymd gentx "$KEY_NAME" 100000000dym --chain-id "$CHAIN_ID" --keyring-backend test
+    dymd add-genesis-account "$(dymd keys show "$KEY_NAME" -a --keyring-backend test)" 100000000000udym
+    dymd gentx "$KEY_NAME" 100000000udym --chain-id "$CHAIN_ID" --keyring-backend test
     # ---------------------------------------------------------------------------- #
     #                                 update config                                #
     # ----------------------------------------------------------------------------
@@ -34,8 +34,8 @@ init_chain() {
     sed -i'' -e "/\[grpc-web\]/,+7 s/address *= .*/address = \"$GRPC_WEB_ADDRESS\"/" "$APP_CONFIG_FILE"
     sed -i'' -e "s/^chain-id *= .*/chain-id = \"$CHAIN_ID\"/" "$CLIENT_CONFIG_FILE"
     sed -i'' -e "s/^node *= .*/node = \"tcp:\/\/$SETTLEMENT_RPC\"/" "$CLIENT_CONFIG_FILE"
-    sed -i'' -e 's/bond_denom": ".*"/bond_denom": "dym"/' "$GENESIS_FILE"
-    sed -i'' -e 's/mint_denom": ".*"/mint_denom": "dym"/' "$GENESIS_FILE"
+    sed -i'' -e 's/bond_denom": ".*"/bond_denom": "udym"/' "$GENESIS_FILE"
+    sed -i'' -e 's/mint_denom": ".*"/mint_denom": "udym"/' "$GENESIS_FILE"
 }
 
 create_genesis() {
@@ -50,16 +50,16 @@ create_genesis() {
     for file in /home/shared/gentx/*.json; do
         VALIDATOR_ACCOUNT=$(cat $file | jq -r '.body.messages[0].delegator_address')
         echo "Adding $VALIDATOR_ACCOUNT to genesis file"
-        dymd add-genesis-account $VALIDATOR_ACCOUNT 100000000000dym
+        dymd add-genesis-account $VALIDATOR_ACCOUNT 100000000000udym
     done
 
     echo "Adding sequencer a account to genesis file"
     echo '12345678' | dymd keys import sequencer-a /sequencer-a-hub.pk --keyring-backend test
-    dymd add-genesis-account $(dymd keys show sequencer-a -a --keyring-backend test) 100000000000dym
+    dymd add-genesis-account $(dymd keys show sequencer-a -a --keyring-backend test) 100000000000udym
 
     echo "Adding sequencer b account to genesis file"
     echo '12345678' | dymd keys import sequencer-b /sequencer-b-hub.pk --keyring-backend test
-    dymd add-genesis-account $(dymd keys show sequencer-b -a --keyring-backend test) 100000000000dym
+    dymd add-genesis-account $(dymd keys show sequencer-b -a --keyring-backend test) 100000000000udym
 
     echo "All accounts added. Creating genesis file and copying to shared volume"
     dymd collect-gentxs --gentx-dir /home/shared/gentx
