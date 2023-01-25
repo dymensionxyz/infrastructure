@@ -10,5 +10,5 @@ This directory contains the necessary files to run a dymension network locally u
 ## Running the network
 
 ```
-docker-compose down -v && docker-compose up --build --force-recreate 
+docker-compose down -v && docker-compose pull && docker-compose up --build --force-recreate 
 ```
