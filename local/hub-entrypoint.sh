@@ -13,6 +13,7 @@ P2P_ADDRESS=${P2P_ADDRESS:-0.0.0.0:26656}
 GRPC_ADDRESS=${GRPC_ADDRESS:-0.0.0.0:9090}
 GRPC_WEB_ADDRESS=${GRPC_WEB_ADDRESS:-0.0.0.0:9091}
 API_ADDRESS=${API_ADDRESS:-"0.0.0.0:1317"}
+KEY_NAME=${KEY_NAME:-$MONIKER_NAME-key}
 
 init_directories() {
     mkdir -p /home/shared/gentx
@@ -27,6 +28,8 @@ init_chain() {
     dymd keys add "$KEY_NAME" --keyring-backend test
     dymd add-genesis-account "$(dymd keys show "$KEY_NAME" -a --keyring-backend test)" 100000000000udym
     dymd gentx "$KEY_NAME" 100000000udym --chain-id "$CHAIN_ID" --keyring-backend test
+    echo "Copying gentx files to shared volume"
+    cp ~/.dymension/config/gentx/* /home/shared/gentx/
     # ---------------------------------------------------------------------------- #
     #                                 update config                                #
     # ----------------------------------------------------------------------------
@@ -58,18 +61,12 @@ add_genesis_accounts_from_external_keys() {
 }
 
 create_genesis() {
-    # Get validator count from environment variable and subtract 1 (genesis validator)
-    VALIDATOR_COUNT=$(($VALIDATOR_COUNT - 1))
+    echo "Copying gentx files to shared volume"
+    cp ~/.dymension/config/gentx/* /home/shared/gentx/
     # Check if the number of gentx files is equal to the number of validators. If it's not, sleep, else create the genesis file
     while [ $(ls /home/shared/gentx | wc -l) -ne $VALIDATOR_COUNT ]; do
         echo "Waiting for all gentx files to be present"
         sleep 1
-    done
-    # Iterate over all the gentx files add get the delegator address and add them to the genesis file
-    for file in /home/shared/gentx/*.json; do
-        VALIDATOR_ACCOUNT=$(cat $file | jq -r '.body.messages[0].delegator_address')
-        echo "Adding $VALIDATOR_ACCOUNT to genesis file"
-        dymd add-genesis-account $VALIDATOR_ACCOUNT 100000000000udym
     done
 
     echo "Adding genesis accounts from external addresses"
@@ -81,7 +78,8 @@ create_genesis() {
 }
 
 wait_for_genesis() { 
-    cp ~/.dymension/config/gentx/* /home/shared/gentx/
+    echo "Copy address to fund to shared volume"
+    echo $(dymd keys show $KEY_NAME -a --keyring-backend test) > /home/shared/addresses-to-fund/$MONIKER_NAME
     # If you're not, wait until the genesis file is present
     while [ ! -f /home/shared/gentx/genesis.json ]; do
         echo "Waiting for genesis file"

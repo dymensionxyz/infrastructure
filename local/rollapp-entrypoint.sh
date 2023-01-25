@@ -27,6 +27,7 @@ DENOM='urap'
 init_directories() {
     mkdir -p /home/shared/gentx
     mkdir -p /home/shared/peers
+    mkdir -p /home/shared/addresses-to-fund
 }
 
 init_chain() {
@@ -54,9 +55,31 @@ init_chain() {
 
 create_genesis() {
     $EXECUTABLE add-genesis-account "$KEY_NAME" "$TOKEN_AMOUNT" --keyring-backend test
+    echo "Funding external keys"
+    add_genesis_accounts_from_external_keys
+    echo "Creating genesis transaction"
     $EXECUTABLE gentx "$KEY_NAME" "$STAKING_AMOUNT" --chain-id "$CHAIN_ID" --keyring-backend test
     $EXECUTABLE collect-gentxs
     cp ~/.rollapp/config/genesis.json /home/shared/gentx/
+}
+
+add_genesis_accounts_from_external_keys() {
+    # Wait for all the addresses to be present
+    while [ $(ls /home/shared/addresses-to-fund | wc -l) -ne $NUM_ADDRESSES_TO_FUND ]; do
+        echo "Waiting for all addresses to be present"
+        sleep 1
+    done
+    # Check if the directory is empty
+    if [ ! "$(ls -A /home/shared/addresses-to-fund)" ]; then
+        echo "No addresses to fund"
+        return
+    fi
+    # Add genesis accounts from external keys
+    for file in /home/shared/addresses-to-fund/*; do
+        ACCOUNT_ADDRESS=$(cat $file)
+        echo "Adding $file key with address $ACCOUNT_ADDRESS to genesis file"
+        $EXECUTABLE add-genesis-account $ACCOUNT_ADDRESS $TOKEN_AMOUNT
+    done
 }
 
 wait_for_genesis() { 
@@ -155,10 +178,11 @@ main() {
     # Start the sequencer a few seconds later to make sure all peers are present
     # so that that peers won't miss the first block
     if [ "$IS_GENESIS_SEQUENCER" = "true" ]; then
-        sleep 2
-        echo "Starting Rollapp"
+        echo "Waiting for 10 seconds before starting sequencer to make sure all peers are present"
+        sleep 10
         sh /app/scripts/run_rollapp.sh
     else    
+        echo "Starting full node"
         sh /app/scripts/run_rollapp.sh
     fi
 }
