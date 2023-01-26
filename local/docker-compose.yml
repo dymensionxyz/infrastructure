@@ -27,7 +27,7 @@ services:
 
   hub-validator-2:
     container_name: hub-validator-2
-    image: dymensionxyz/dymension
+    image: ghcr.io/dymensionxyz/dymension:latest
     ports:
       - "26658:26657"
       - "1318:1317"
