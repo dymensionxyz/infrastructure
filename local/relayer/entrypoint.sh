@@ -16,6 +16,8 @@ RELAYER_PATH=${RELAYER_PATH:-"rollapp-hub"}
 IBC_PORT=${IBC_PORT:-"transfer"}
 IBC_VERSION=${IBC_VERSION:-"ics20-1"}
 DEBUG_ADDR=${DEBUG_ADDR:-"0.0.0.0:7597"}
+LINK_TIMEOUT=${LINK_TIMEOUT:-"30s"}
+LINK_MAX_RETRIES=${LINK_MAX_RETRIES:-"10"}
 
 
 init_relayer() {
@@ -69,7 +71,7 @@ create_keys_for_hub_and_rollapp() {
 create_ibc_link() {
     echo "Creating IBC link"
     rly paths new "$ROLLAPP_CHAIN_ID" "$HUB_CHAIN_ID" "$RELAYER_PATH" --src-port "$IBC_PORT" --dst-port "$IBC_PORT" --version "$IBC_VERSION"
-    rly transact link "$RELAYER_PATH" --src-port "$IBC_PORT" --dst-port "$IBC_PORT" --version "$IBC_VERSION"
+    rly transact link "$RELAYER_PATH" --src-port "$IBC_PORT" --dst-port "$IBC_PORT" --version "$IBC_VERSION" --timeout $LINK_TIMEOUT --max-retries $LINK_MAX_RETRIES
 }
 
 start_relayer() {
