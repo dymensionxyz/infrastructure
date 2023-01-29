@@ -60,10 +60,10 @@ services:
       - SETTLEMENT_RPC=hub-validator-1:26657
       - HUB_CHAIN_ID=hub
       - KEY_NAME_DYM=dym-user
-      - BATCH_SIZE=150
-      - BLOCK_TIME=0.2s
+      - BATCH_SIZE=15
+      - BLOCK_TIME=2s
       - DA_LAYER=celestia
-      - DA_LC_ENDPOINT=34.201.203.215:26659
+      - DA_LC_ENDPOINT=3.88.163.116:26659
       - DA_NAMESPACE_ID=[1,2,3,4,5,6,255,255]
     volumes:
       - hub:/home/hub
@@ -131,8 +131,8 @@ services:
       - HUB_CHAIN_ID=hub
       - NUM_ADDRESSES_TO_FUND=0
       - KEY_NAME_DYM=dym-user
-      - BATCH_SIZE=500
-      - BLOCK_TIME=0.2s
+      - BATCH_SIZE=15
+      - BLOCK_TIME=2s
       - DA_LAYER=celestia
       - DA_LC_ENDPOINT=34.201.203.215:26659
       - DA_NAMESPACE_ID=[2,2,3,4,5,6,255,255]
