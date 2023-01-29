@@ -23,6 +23,8 @@ git clone https://github.com/dymensionxyz/dymension.git
 cd dymension
 make install
 
+set -a
+source ~/dymension/aws.env
 sh scripts/setup_local.sh
 ```
 
@@ -51,17 +53,14 @@ git clone https://github.com/dymensionxyz/dymension.git
 cd dymension
 make install
 
+set -a
+source ~/dymension/aws.env
 sh scripts/setup_local.sh
 ```
 
 copy genesis from local directory to server2
 ```
 scp genesis.json ec2-user@$SERVER2:/home/ec2-user/.dymension/config/genesis.json
-```
-
-Edit peers into config.toml on server 2:
-```
-validator1_node_id@$SERVER1:36656
 ```
 
 check the address of this account 
@@ -72,7 +71,6 @@ and fund it on server1:
 ```
     dymd tx bank send $(dymd keys show -a local-user --keyring-backend test) XXXXX 10000000000udym --keyring-backend test
 ```
-
 
 Set service and run
 ```
