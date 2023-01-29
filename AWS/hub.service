@@ -1,0 +1,11 @@
+[Unit]
+After=network.target
+[Service]
+EnvironmentFile=/home/ec2-user/dymension/aws.env
+Type=simple
+Restart=always
+RestartSec=1
+User=ec2-user
+ExecStart=dymd start
+[Install]
+WantedBy=multi-user.target
