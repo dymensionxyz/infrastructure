@@ -5,14 +5,12 @@
 sudo yum update
 sudo yum install git go jq make
 mkdir dymension && cd dymension
-
-#Add 'export PATH=$PATH:$HOME/go/bin' in .bashrc 
 ```
 
 
 The `aws.env` contains all the ENV variables that need to be overwritten:
 ```
-cp hub.env ~/dymension/aws.env
+cp aws.env ~/dymension/aws.env
 ```
 modify needed values in case needed (e.g set unique CHAIN_ID)
 
@@ -22,6 +20,7 @@ modify needed values in case needed (e.g set unique CHAIN_ID)
 git clone https://github.com/dymensionxyz/dymension.git
 cd dymension
 make install
+sudo ln -s ~/go/bin/dymd /usr/local/bin/
 
 set -a
 source ~/dymension/aws.env
@@ -52,6 +51,7 @@ sudo systemctl start hub
 git clone https://github.com/dymensionxyz/dymension.git
 cd dymension
 make install
+sudo ln -s ~/go/bin/dymd /usr/local/bin/
 
 set -a
 source ~/dymension/aws.env
@@ -106,16 +106,19 @@ dymd tx staking create-validator \
 git clone https://github.com/dymensionxyz/dymension.git
 cd dymension
 make install
+sudo ln -s ~/go/bin/dymd /usr/local/bin/
 cd ..
 
 git clone https://github.com/dymensionxyz/relayer.git
 cd relayer
 make install
+sudo ln -s ~/go/bin/rly /usr/local/bin/
 cd ..
 
 git clone https://github.com/dymensionxyz/dymension-rdk.git
 cd dymension-rdk
 make install
+sudo ln -s ~/go/bin/rollappd /usr/local/bin/
 
 set -a
 source ~/dymension/aws.env
@@ -144,6 +147,4 @@ cp relayer.service /usr/lib/systemd/system
 sudo systemctl daemon-reload
 sudo systemctl enable relayer
 sudo systemctl start relayer
-```
-
 ```
