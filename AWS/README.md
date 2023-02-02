@@ -2,8 +2,17 @@
 # Run env on AWS
 ## Prepare servers
 ```
-sudo yum update
-sudo yum install git go jq make
+sudo apt update
+sudo apt install git jq make gcc -y
+
+wget https://go.dev/dl/go1.18.10.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.18.10.linux-amd64.tar.gz
+
+echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
+echo "export PATH=$PATH:$HOME/go/bin" >> ~/.bashrc
+source ~/.bashrc
+
+
 mkdir dymension && cd dymension
 ```
 
@@ -19,12 +28,11 @@ modify needed values in case needed (e.g set unique CHAIN_ID)
 ```
 git clone https://github.com/dymensionxyz/dymension.git
 cd dymension
+git checkout v0.2.0-beta
 make install
-sudo ln -s ~/go/bin/dymd /usr/local/bin/
 
 set -a
-source ~/dymension/aws.env
-sh scripts/setup_local.sh
+source ~/dymension/aws.env && sh scripts/setup_local.sh
 ```
 
 copy genesis from server 1 to a local directory
