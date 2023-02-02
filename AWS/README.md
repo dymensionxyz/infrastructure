@@ -8,8 +8,7 @@ sudo apt install git jq make gcc -y
 wget https://go.dev/dl/go1.18.10.linux-amd64.tar.gz
 sudo tar -C /usr/local -xzf go1.18.10.linux-amd64.tar.gz
 
-echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
-echo "export PATH=$PATH:$HOME/go/bin" >> ~/.bashrc
+echo "export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin" >> ~/.bashrc
 source ~/.bashrc
 
 
@@ -19,7 +18,7 @@ mkdir dymension && cd dymension
 
 The `aws.env` contains all the ENV variables that need to be overwritten:
 ```
-cp aws.env ~/dymension/aws.env
+cp testnet.env ~/dymension/aws.env
 ```
 modify needed values in case needed (e.g set unique CHAIN_ID)
 
@@ -113,14 +112,13 @@ dymd tx staking create-validator \
 ```
 git clone https://github.com/dymensionxyz/dymension.git
 cd dymension
+git checkout v0.2.0-beta
 make install
-sudo ln -s ~/go/bin/dymd /usr/local/bin/
 cd ..
 
 git clone https://github.com/dymensionxyz/relayer.git
 cd relayer
 make install
-sudo ln -s ~/go/bin/rly /usr/local/bin/
 cd ..
 
 git clone https://github.com/dymensionxyz/dymension-rdk.git
@@ -130,6 +128,8 @@ sudo ln -s ~/go/bin/rollappd /usr/local/bin/
 
 set -a
 source ~/dymension/aws.env
+set +a
+
 sh scripts/init_rollapp.sh
 sh scripts/register_rollapp_to_hub.sh
 sh scripts/register_sequencer_to_hub.sh
@@ -148,6 +148,7 @@ To run the relayer:
 ```
 set -a
 source ~/dymension/aws.env
+set +a
 sh scripts/setup_ibc.sh
 
 cp relayer.service /usr/lib/systemd/system
