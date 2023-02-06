@@ -71,6 +71,9 @@ create_keys_for_hub_and_rollapp() {
 create_ibc_link() {
     echo "Creating IBC link"
     rly paths new "$ROLLAPP_CHAIN_ID" "$HUB_CHAIN_ID" "$RELAYER_PATH" --src-port "$IBC_PORT" --dst-port "$IBC_PORT" --version "$IBC_VERSION"
+    ## TODO: query the hub for the first batch and wait for it to be written
+    echo "Waiting sequencer to write the first batch.."
+    sleep 60
     rly transact link "$RELAYER_PATH" --src-port "$IBC_PORT" --dst-port "$IBC_PORT" --version "$IBC_VERSION" --timeout $LINK_TIMEOUT --max-retries $LINK_MAX_RETRIES
 }
 
