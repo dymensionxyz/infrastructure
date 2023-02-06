@@ -6,6 +6,6 @@ Type=simple
 Restart=always
 RestartSec=1
 User=ubuntu
-ExecStart=dymd start
+ExecStart=/bin/bash /home/ubuntu/dymension/dymension/scripts/run_dymension.sh
 [Install]
 WantedBy=multi-user.target

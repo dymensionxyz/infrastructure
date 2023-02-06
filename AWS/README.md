@@ -12,6 +12,9 @@ echo "export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin" >> ~/.bashrc
 source ~/.bashrc
 
 
+ulimit -n 8192
+
+
 mkdir dymension && cd dymension
 ```
 
@@ -57,17 +60,19 @@ sudo systemctl start hub
 ```
 git clone https://github.com/dymensionxyz/dymension.git
 cd dymension
+git checkout v0.2.0-beta
 make install
-sudo ln -s ~/go/bin/dymd /usr/local/bin/
 
 set -a
 source ~/dymension/aws.env
+set +a
 sh scripts/setup_local.sh
 ```
 
-copy genesis from local directory to server2
+copy genesis file to server2
 ```
-scp genesis.json ec2-user@$SERVER2:/home/ec2-user/.dymension/config/genesis.json
+curl -s https://raw.githubusercontent.com/dymensionxyz/infrastructure/1fbe5aa772dbe7788a3d0b9b7a0368da4d4d3dcb/AWS/genesis.json > ~/.dymension/config/genesis.json
+
 ```
 
 check the address of this account 
@@ -86,6 +91,8 @@ cp hub.service /usr/lib/systemd/system
 sudo systemctl daemon-reload
 sudo systemctl enable hub
 sudo systemctl start hub
+
+journalctl -f -u hub
 ```
 
 ### Make the node as validator
