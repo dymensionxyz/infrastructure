@@ -123,15 +123,10 @@ git checkout v0.2.0-beta
 make install
 cd ..
 
-git clone https://github.com/dymensionxyz/relayer.git
-cd relayer
-make install
-cd ..
 
 git clone https://github.com/dymensionxyz/dymension-rdk.git
 cd dymension-rdk
 make install
-sudo ln -s ~/go/bin/rollappd /usr/local/bin/
 
 set -a
 source ~/dymension/aws.env
@@ -146,12 +141,28 @@ Set service and run
 ```
 cp rollapp.service /usr/lib/systemd/system
 
+mkdir ~/.rollapp/log
+touch ~/.rollapp/log/rollapp.log
+
+
 sudo systemctl daemon-reload
 sudo systemctl enable rollapp
 sudo systemctl start rollapp
 ```
 
-To run the relayer:
+### To run the relayer:
+Download and install
+
+```
+git clone https://github.com/dymensionxyz/relayer.git
+cd relayer
+make install
+cd ..
+```
+
+
+Setup and run:
+
 ```
 set -a
 source ~/dymension/aws.env
