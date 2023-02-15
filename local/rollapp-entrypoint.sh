@@ -27,6 +27,7 @@ DENOM='urap'
 init_directories() {
     mkdir -p /home/shared/gentx
     mkdir -p /home/shared/peers
+    mkdir -p /home/shared/addresses-to-fund
 }
 
 init_chain() {
@@ -53,11 +54,32 @@ init_chain() {
 }
 
 create_genesis() {
-    # Import the key for the genesis sequencer as it was funded by the hub already
     $EXECUTABLE add-genesis-account "$KEY_NAME" "$TOKEN_AMOUNT" --keyring-backend test
+    echo "Funding external keys"
+    add_genesis_accounts_from_external_keys
+    echo "Creating genesis transaction"
     $EXECUTABLE gentx "$KEY_NAME" "$STAKING_AMOUNT" --chain-id "$CHAIN_ID" --keyring-backend test
     $EXECUTABLE collect-gentxs
     cp ~/.rollapp/config/genesis.json /home/shared/gentx/
+}
+
+add_genesis_accounts_from_external_keys() {
+    # Wait for all the addresses to be present
+    while [ $(ls /home/shared/addresses-to-fund | wc -l) -ne $NUM_ADDRESSES_TO_FUND ]; do
+        echo "Waiting for all addresses to be present"
+        sleep 1
+    done
+    # Check if the directory is empty
+    if [ ! "$(ls -A /home/shared/addresses-to-fund)" ]; then
+        echo "No addresses to fund"
+        return
+    fi
+    # Add genesis accounts from external keys
+    for file in /home/shared/addresses-to-fund/*; do
+        ACCOUNT_ADDRESS=$(cat $file)
+        echo "Adding $file key with address $ACCOUNT_ADDRESS to genesis file"
+        $EXECUTABLE add-genesis-account $ACCOUNT_ADDRESS $TOKEN_AMOUNT
+    done
 }
 
 wait_for_genesis() { 
@@ -94,11 +116,25 @@ add_peers_to_variable() {
     echo "P2P_SEEDS=$P2P_SEEDS" >> /app/scripts/shared.sh
 }
 
-import_dym_key() {
-    echo '12345678' | dymd keys import $KEY_NAME_DYM /sequencer-hub.pk --keyring-backend test
+create_key_for_hub() {
+    dymd keys add $KEY_NAME_DYM --keyring-backend test
+    # Write the key address to the shared directory
+    echo $(dymd keys show $KEY_NAME_DYM -a --keyring-backend test) > /home/hub/addresses-to-fund/$CHAIN_ID
+}
+
+wait_for_hub() {
+    # get hub host and port from the rpc address
+    HUB_HOST=$(echo $SETTLEMENT_RPC | cut -d':' -f1)
+    HUB_PORT=$(echo $SETTLEMENT_RPC | cut -d':' -f2)
+    # Wait for the hub to be up using curl on port 26657
+    while ! curl -s $HUB_HOST:$HUB_PORT; do
+        echo "Waiting for the hub to be up"
+        sleep 1
+    done
 }
 
 register_rollapp_to_hub() {
+    sleep 5
     echo "Registering Rollapp to Hub"
     dymd tx rollapp create-rollapp "$ROLLAPP_ID" stamp1 "genesis-path/1" 3 100 '{"Addresses":[]}' \
     --from "$KEY_NAME_DYM" \
@@ -129,7 +165,8 @@ main() {
     init_chain
     if [ "$IS_GENESIS_SEQUENCER" = "true" ]; then
         create_genesis
-        import_dym_key
+        create_key_for_hub
+        wait_for_hub
         register_rollapp_to_hub
         register_sequencer_to_hub
     else
@@ -138,7 +175,16 @@ main() {
     create_peer_address
     wait_for_all_peer_addresses
     add_peers_to_variable
-    sh /app/scripts/run_rollapp.sh
+    # Start the sequencer a few seconds later to make sure all peers are present
+    # so that that peers won't miss the first block
+    if [ "$IS_GENESIS_SEQUENCER" = "true" ]; then
+        echo "Waiting for 10 seconds before starting sequencer to make sure all peers are present"
+        sleep 10
+        sh /app/scripts/run_rollapp.sh
+    else    
+        echo "Starting full node"
+        sh /app/scripts/run_rollapp.sh
+    fi
 }
 
 main
