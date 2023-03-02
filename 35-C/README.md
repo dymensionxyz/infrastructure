@@ -4,10 +4,8 @@
 ```
 sudo apt update
 sudo apt install git jq make gcc -y
-
 wget https://go.dev/dl/go1.18.10.linux-amd64.tar.gz
 sudo tar -C /usr/local -xzf go1.18.10.linux-amd64.tar.gz
-
 echo "export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin" >> ~/.bashrc
 source ~/.bashrc
 
@@ -34,26 +32,23 @@ git checkout v0.2.0-beta
 make install
 
 set -a
-source ~/dymension/aws.env && sh scripts/setup_local.sh
+source ~/dymension/aws.env
+set +a
+sh scripts/setup_local.sh
 ```
 
 copy genesis from server 1 to a local directory
 ```
-scp ec2-user@$SERVER1:/home/ec2-user/.dymension/config/genesis.json .
-```
-
-write the node-id of server1
-```
-validator1_node_id=dymd tendermint show-node-id
+wget https://raw.githubusercontent.com/dymensionxyz/testnets/main/dymension-hub/35-C/genesis.json -O ~/.dymension/config/genesis.json
 ```
 
 Set service and run
 ```
-cp hub.service /usr/lib/systemd/system
+sudo vi /usr/lib/systemd/system/hub.service
 
 sudo systemctl daemon-reload
 sudo systemctl enable hub
-sudo systemctl start hub
+sudo systemctl start hub && journalctl -f -u hub
 ```
 
 ## Server 2 (hub validator 2)
@@ -147,7 +142,7 @@ touch ~/.rollapp/log/rollapp.log
 
 sudo systemctl daemon-reload
 sudo systemctl enable rollapp
-sudo systemctl start rollapp
+sudo systemctl start rollapp && journalctl -f -u rollapp
 ```
 
 ### To run the relayer:
@@ -174,4 +169,6 @@ cp relayer.service /usr/lib/systemd/system
 sudo systemctl daemon-reload
 sudo systemctl enable relayer
 sudo systemctl start relayer
+
+sudo systemctl start relayer && journalctl -f -u relayer
 ```
