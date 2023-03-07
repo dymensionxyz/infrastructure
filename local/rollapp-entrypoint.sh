@@ -14,12 +14,14 @@ GRPC_LADDRESS=${GRPC_LADDRESS:-"0.0.0.0:9090"}
 GRPC_WEB_LADDRESS=${GRPC_WEB_LADDRESS:-"0.0.0.0:9091"}
 
 CHAIN_DIR="$HOME/.rollapp"
+LOG_FILE_PATH=${LOG_FILE_PATH:-"$CHAIN_DIR/log/rollapp.log"}
 CONFIG_DIRECTORY="$CHAIN_DIR/config"
 GENESIS_FILE="$CONFIG_DIRECTORY/genesis.json"
 TENDERMINT_CONFIG_FILE="$CONFIG_DIRECTORY/config.toml"
 CLIENT_CONFIG_FILE="$CONFIG_DIRECTORY/client.toml"
 APP_CONFIG_FILE="$CONFIG_DIRECTORY/app.toml"
 EXECUTABLE="rollappd"
+KEYRING_PATH=$CHAIN_DIR
 
 
 DENOM='urap'
@@ -117,9 +119,9 @@ add_peers_to_variable() {
 }
 
 create_key_for_hub() {
-    dymd keys add $KEY_NAME_DYM --keyring-backend test
+    dymd keys add $KEY_NAME_DYM --keyring-backend test --keyring-dir $KEYRING_PATH 
     # Write the key address to the shared directory
-    echo $(dymd keys show $KEY_NAME_DYM -a --keyring-backend test) > /home/hub/addresses-to-fund/$CHAIN_ID
+    echo $(dymd keys show $KEY_NAME_DYM -a --keyring-backend test --keyring-dir $KEYRING_PATH) > /home/hub/addresses-to-fund/$CHAIN_ID
 }
 
 wait_for_hub() {
@@ -139,6 +141,7 @@ register_rollapp_to_hub() {
     dymd tx rollapp create-rollapp "$ROLLAPP_ID" stamp1 "genesis-path/1" 3 100 '{"Addresses":[]}' \
     --from "$KEY_NAME_DYM" \
     --keyring-backend test \
+    --keyring-dir $KEYRING_PATH \
     --node "tcp://$SETTLEMENT_RPC" \
     --chain-id "$HUB_CHAIN_ID" \
     --broadcast-mode block \
@@ -154,6 +157,7 @@ register_sequencer_to_hub() {
     dymd tx sequencer create-sequencer "$SEQ_PUB_KEY" "$ROLLAPP_ID" "$DESCRIPTION" \
     --from "$KEY_NAME_DYM" \
     --keyring-backend test \
+    --keyring-dir $KEYRING_PATH \
     --node "tcp://$SETTLEMENT_RPC" \
     --chain-id "$HUB_CHAIN_ID" \
     --broadcast-mode block \
