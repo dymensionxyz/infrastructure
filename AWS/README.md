@@ -46,6 +46,12 @@ sudo systemctl enable hub
 sudo systemctl start hub
 ```
 
+Update the log rotation to rotate every 10GB
+```
+sudo sed -i 's/daily/size 10G/' /etc/logrotate.d/rsyslog
+sudo systemctl restart syslog
+```
+
 ## Server 2 (hub validator 2)
 ```
 git clone https://github.com/dymensionxyz/dymension.git
@@ -79,6 +85,12 @@ cp hub.service /usr/lib/systemd/system
 sudo systemctl daemon-reload
 sudo systemctl enable hub
 sudo systemctl start hub
+```
+
+Update the log rotation to rotate every 10GB
+```
+sudo sed -i 's/daily/size 10G/' /etc/logrotate.d/rsyslog
+sudo systemctl restart syslog
 ```
 
 ### Make the node as validator
@@ -134,6 +146,12 @@ cp rollapp.service /usr/lib/systemd/system
 sudo systemctl daemon-reload
 sudo systemctl enable rollapp
 sudo systemctl start rollapp
+```
+
+Update the log rotation to rotate every 10GB
+```
+sudo sed -i 's/daily/size 10G/' /etc/logrotate.d/rsyslog
+sudo systemctl restart syslog
 ```
 
 To run the relayer:
