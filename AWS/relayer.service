@@ -1,0 +1,12 @@
+[Unit]
+Description="Relayer Service"
+After=network.target
+[Service]
+EnvironmentFile=/home/ec2-user/dymension/aws.env
+Type=simple
+Restart=always
+RestartSec=1
+User=ec2-user
+ExecStart=/bin/bash /home/ec2-user/dymension/dymension-rdk/scripts/run_relayer.sh
+[Install]
+WantedBy=multi-user.target

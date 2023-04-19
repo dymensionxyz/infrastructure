@@ -88,7 +88,7 @@ services:
       - SETTLEMENT_LAYER=dymension
       - SETTLEMENT_RPC=hub-validator-1:26657
       - DA_LAYER=celestia
-      - DA_LC_ENDPOINT=34.201.203.215:26659
+      - DA_LC_ENDPOINT=3.88.163.116:26659
       - DA_NAMESPACE_ID=[1,2,3,4,5,6,255,255]
     volumes:
       - rollapp-a:/home/shared
@@ -159,7 +159,7 @@ services:
       - SETTLEMENT_LAYER=dymension
       - SETTLEMENT_RPC=hub-validator-1:26657
       - DA_LAYER=celestia
-      - DA_LC_ENDPOINT=34.201.203.215:26659
+      - DA_LC_ENDPOINT=3.93.167.114:26659
       - DA_NAMESPACE_ID=[2,2,3,4,5,6,255,255]
     volumes:
       - rollapp-b:/home/shared
