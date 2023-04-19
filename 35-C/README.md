@@ -137,7 +137,7 @@ Set service and run
 cp rollapp.service /usr/lib/systemd/system
 
 mkdir ~/.rollapp/log
-touch ~/.rollapp/log/rollapp.log
+touch ~/.rollapp_evm/log/rollapp.log
 
 
 sudo systemctl daemon-reload
@@ -149,8 +149,8 @@ sudo systemctl start rollapp && journalctl -f -u rollapp
 Download and install
 
 ```
-git clone https://github.com/dymensionxyz/relayer.git
-cd relayer
+git clone https://github.com/dymensionxyz/dymension-relayer.git
+cd dymension-relayer
 make install
 cd ..
 ```
@@ -162,7 +162,7 @@ Setup and run:
 set -a
 source ~/dymension/aws.env
 set +a
-sh scripts/setup_ibc.sh
+sh scripts/ibc/setup_ibc.sh
 
 cp relayer.service /usr/lib/systemd/system
 
