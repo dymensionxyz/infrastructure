@@ -4,7 +4,8 @@ After=network.target
 Type=simple
 Restart=always
 RestartSec=1
-User=ec2-user
-ExecStart=dymd start
+LimitNOFILE=4096
+User=ubuntu
+ExecStart=/bin/bash /home/ubuntu/code/dymension/scripts/run_dymension.sh
 [Install]
 WantedBy=multi-user.target
