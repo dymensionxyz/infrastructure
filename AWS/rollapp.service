@@ -2,11 +2,12 @@
 Description="Rollapp Service"
 After=network.target
 [Service]
-EnvironmentFile=/home/ec2-user/dymension/aws.env
+EnvironmentFile=/home/ubuntu/dymension/aws.env
 Type=simple
+LimitNOFILE=4096
 Restart=always
-RestartSec=1
-User=ec2-user
-ExecStart=/bin/bash /home/ec2-user/dymension/dymension-rdk/scripts/run_rollapp.sh
+RestartSec=5
+User=ubuntu
+ExecStart=/bin/bash /home/ubuntu/dymension/dymension-rdk/scripts/run_rollapp.sh
 [Install]
 WantedBy=multi-user.target

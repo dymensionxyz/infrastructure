@@ -1,6 +1,7 @@
 [Unit]
 After=network.target
 [Service]
+EnvironmentFile=/home/ubuntu/dymension/aws.env
 Type=simple
 Restart=always
 RestartSec=1
