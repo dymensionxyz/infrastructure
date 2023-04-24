@@ -60,7 +60,7 @@ sudo ln -s ~/go/bin/dymd /usr/local/bin/
 ```
 set -a
 source $HOME/code/aws.env
-sh scripts/setup_local.sh
+sh $HOME/code/dymension/scripts/setup_local.sh
 ```
 
 ### Run the node
@@ -167,7 +167,7 @@ check the address of this account
 dymd keys show -a local-user --keyring-backend test
 ```
 
-and fund it by running this command on server1. Make sure to replace <server-2-address> with the address of server 2:
+and fund it by running the following command on server1. Make sure to replace <server-2-address> with the address of server 2 you got from the previous command
 
 ```
     dymd tx bank send $(dymd keys show -a local-user --keyring-backend test) <server-2-address> 10000000000udym --keyring-backend test --broadcast-mode block 
@@ -196,35 +196,66 @@ dymd tx staking create-validator \
 
 ## Server3 (rollapp sequencer)
 
+### Install binaries
+
+Install dymd. Make sure to replace <tag_name> with the relevant tag name.
 ```
-git clone https://github.com/dymensionxyz/dymension.git --branch <tag_name>
-cd dymension
+git clone https://github.com/dymensionxyz/dymension.git --branch <tag_name> $HOME/code/dymension
+cd $HOME/code/dymension
 make install
 sudo ln -s ~/go/bin/dymd /usr/local/bin/
-cd ..
+```
 
-git clone https://github.com/dymensionxyz/relayer.git
-cd relayer
+Install relayer. Make sure to replace <tag_name> with the relevant tag/branch name.
+```
+git clone https://github.com/dymensionxyz/dymension-relayer.git --branch <tag_name> $HOME/code/relayer
+cd $HOME/code/relayer
 make install
 sudo ln -s ~/go/bin/rly /usr/local/bin/
-cd ..
+```
 
-git clone https://github.com/dymensionxyz/dymension-rdk.git
-cd dymension-rdk
+Install the RDK. Make sure to replace <tag_name> with the relevant tag/branch name.
+```
+git clone https://github.com/dymensionxyz/dymension-rdk.git --branch <tag_name> $HOME/code/dymension-rdk
+cd $HOME/code/dymension-rdk
 make install
 sudo ln -s ~/go/bin/rollappd /usr/local/bin/
+```
 
+### Run a DA light client and fund it 
+
+follow the instructions on how to run a [DA light client](https://docs.celestia.org/nodes/light-node/)
+
+### Setup the node
+
+
+```
+git clone https://github.com/dymensionxyz/infrastructure.git $HOME/code/infrastructure
+```
+
+Copy `aws.env` and overwrite all relavant variabales inside and specifically set the HUB_PEERS to the address of server 1:
+
+```
+cp $HOME/code/infrastructure/AWS/aws.env $HOME/code/aws.env && vim $HOME/code/aws.env
+```
+
+Setup the sequencer node and register it to the hub.
+
+```
 set -a
-source ~/dymension/aws.env
-sh scripts/init_rollapp.sh
-sh scripts/register_rollapp_to_hub.sh
-sh scripts/register_sequencer_to_hub.sh
+source $HOME/code/dymension-rdk/scripts/shared.sh
+source $HOME/code/aws.env
+sh $HOME/code/dymension-rdk/scripts/init_rollapp.sh
+sh $HOME/code/dymension-rdk/scripts/settlement/register_rollapp_to_hub.sh
+sh $HOME/code/dymension-rdk/scripts/settlement/register_sequencer_to_hub.sh
 ```
 
-Set service and run
+### Run the sequencer
+
+Set the service and run
 
 ```
-cp rollapp.service /usr/lib/systemd/system
+sudo systemctl link $HOME/code/infrastructure/AWS/rollapp.service
 
 sudo systemctl daemon-reload
 sudo systemctl enable rollapp
@@ -237,14 +268,29 @@ sudo sed -i 's/daily/size 10G/' /etc/logrotate.d/rsyslog
 sudo systemctl restart syslog
 ```
 
-To run the relayer:
+### Run the relayer
+
+Change the relevant arguments in aws.env file for the relayer
+
+```
+vim $HOME/code/aws.env
+```
+
+Run the relayer setup script
 
 ```
 set -a
-source ~/dymension/aws.env
-sh scripts/setup_ibc.sh
+source $HOME/code/aws.env
+sh $HOME/code/dymension-rdk/scripts/ibc/setup_ibc.sh
+```
 
-cp relayer.service /usr/lib/systemd/system
+
+
+Set the service and run
+
+```
+
+sudo systemctl link $HOME/code/infrastructure/AWS/relayer.service
 
 sudo systemctl daemon-reload
 sudo systemctl enable relayer

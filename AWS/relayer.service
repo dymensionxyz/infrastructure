@@ -2,11 +2,11 @@
 Description="Relayer Service"
 After=network.target
 [Service]
-EnvironmentFile=/home/ubuntu/dymension/aws.env
+EnvironmentFile=/home/ubuntu/code/aws.env
 Type=simple
 Restart=always
 RestartSec=5
 User=ubuntu
-ExecStart=/bin/bash /home/ubuntu/dymension/dymension-rdk/scripts/ibc/run_relayer.sh
+ExecStart=/bin/bash /home/ubuntu/code/dymension-rdk/scripts/ibc/run_relayer.sh
 [Install]
 WantedBy=multi-user.target
