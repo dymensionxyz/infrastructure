@@ -2,7 +2,7 @@
 Description="Relayer Service"
 After=network.target
 [Service]
-EnvironmentFile=/home/ubuntu/code/aws.env
+EnvironmentFile=/home/ubuntu/code/relayer.env
 Type=simple
 Restart=always
 RestartSec=5

@@ -2,7 +2,7 @@
 Description="Rollapp Service"
 After=network.target
 [Service]
-EnvironmentFile=/home/ubuntu/code/aws.env
+EnvironmentFile=/home/ubuntu/code/rollapp.env
 Type=simple
 LimitNOFILE=4096
 Restart=always

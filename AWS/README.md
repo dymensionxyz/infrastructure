@@ -36,13 +36,13 @@ go version
 ### Config the node 
 
 ```
-git clone https://github.com/dymensionxyz/infrastructure.git
+git clone https://github.com/dymensionxyz/infrastructure.git $HOME/code/infrastructure
 ```
 
 Copy `aws.env` and overwrite all relavant variabales inside:
 
 ```
-cp $HOME/code/infrastructure/AWS/aws.env $HOME/code/aws.env
+cp $HOME/code/infrastructure/AWS/hub.env $HOME/code/hub.env
 ```
 
 ### Install dymd
@@ -59,7 +59,7 @@ sudo ln -s ~/go/bin/dymd /usr/local/bin/
 
 ```
 set -a
-source $HOME/code/aws.env
+source $HOME/code/hub.env
 sh $HOME/code/dymension/scripts/setup_local.sh
 ```
 
@@ -109,16 +109,16 @@ git clone https://github.com/dymensionxyz/infrastructure.git $HOME/code/infrastr
 ```
 ```
 
-Copy `aws.env` and overwrite all relavant variabales inside and specifically set the HUB_PEERS to the address of server 1:
+Copy `hub.env` and overwrite all relavant variabales inside and specifically set the HUB_PEERS to the address of server 1:
 
 ```
-cp $HOME/code/infrastructure/AWS/aws.env $HOME/code/aws.env && vim $HOME/code/aws.env
+cp $HOME/code/infrastructure/AWS/hub.env $HOME/code/aws.env && vim $HOME/code/hub.env
 ```
 
 Run the node setup script.
 ```
 set -a
-source $HOME/code/aws.env
+source $HOME/code/hub.env
 sh $HOME/code/dymension/scripts/setup_local.sh
 ```
 
@@ -176,7 +176,7 @@ and fund it by running the following command on server1. Make sure to replace <s
 Create a validator on node 2 as well
 
 ```
-source $HOME/code/aws.env
+source $HOME/code/hub.env
 
 dymd tx staking create-validator \
   --amount 1000000udym \
@@ -218,33 +218,40 @@ Install the RDK. Make sure to replace <tag_name> with the relevant tag/branch na
 ```
 git clone https://github.com/dymensionxyz/dymension-rdk.git --branch <tag_name> $HOME/code/dymension-rdk
 cd $HOME/code/dymension-rdk
+```
+
+### Choose your rollapp flavour
+
+For installing evm rollapp
+```
+make install_evm
+sudo ln -s ~/go/bin/rollapp_evm /usr/local/bin/
+```
+
+For installing vanilla rollapp
+```
 make install
 sudo ln -s ~/go/bin/rollappd /usr/local/bin/
 ```
 
-### Run a DA light client and fund it 
+### Run a DA light client and fund it
 
 follow the instructions on how to run a [DA light client](https://docs.celestia.org/nodes/light-node/)
 
-### Setup the node
+### Setup the node 
 
-
+Edit the configurations according to your needs.
 ```
-git clone https://github.com/dymensionxyz/infrastructure.git $HOME/code/infrastructure
-```
-
-Copy `aws.env` and overwrite all relavant variabales inside and specifically set the HUB_PEERS to the address of server 1:
-
-```
-cp $HOME/code/infrastructure/AWS/aws.env $HOME/code/aws.env && vim $HOME/code/aws.env
+cp $HOME/code/dymension-rdk/scripts/shared.sh $HOME/code/rollapp.env && vim $HOME/code/rollapp.env
 ```
 
 Setup the sequencer node and register it to the hub.
 
 ```
+unset
 set -a
+source $HOME/code/rollapp.env
 source $HOME/code/dymension-rdk/scripts/shared.sh
-source $HOME/code/aws.env
 sh $HOME/code/dymension-rdk/scripts/init_rollapp.sh
 sh $HOME/code/dymension-rdk/scripts/settlement/register_rollapp_to_hub.sh
 sh $HOME/code/dymension-rdk/scripts/settlement/register_sequencer_to_hub.sh
@@ -270,17 +277,17 @@ sudo systemctl restart syslog
 
 ### Run the relayer
 
-Change the relevant arguments in aws.env file for the relayer
+Change the relevant arguments in relayer.env file for the relayer
 
 ```
-vim $HOME/code/aws.env
+cp $HOME/code/infrastructure/AWS/relayer.env $HOME/code/relayer.env && vim $HOME/code/relayer.env
 ```
 
 Run the relayer setup script
 
 ```
 set -a
-source $HOME/code/aws.env
+source $HOME/code/relayer.env
 sh $HOME/code/dymension-rdk/scripts/ibc/setup_ibc.sh
 ```
 
