@@ -248,7 +248,6 @@ cp $HOME/code/dymension-rdk/scripts/shared.sh $HOME/code/rollapp.env && vim $HOM
 Setup the sequencer node and register it to the hub.
 
 ```
-unset
 set -a
 source $HOME/code/rollapp.env
 source $HOME/code/dymension-rdk/scripts/shared.sh
@@ -291,10 +290,7 @@ source $HOME/code/relayer.env
 sh $HOME/code/dymension-rdk/scripts/ibc/setup_ibc.sh
 ```
 
-
-
 Set the service and run
-
 ```
 
 sudo systemctl link $HOME/code/infrastructure/AWS/relayer.service
@@ -302,4 +298,22 @@ sudo systemctl link $HOME/code/infrastructure/AWS/relayer.service
 sudo systemctl daemon-reload
 sudo systemctl enable relayer
 sudo systemctl start relayer
+```
+
+> **Note:** The following section is a temporary fix for brute forcing the relayer to work properly.
+
+Relay packets every interval
+```
+sudo systemctl link $HOME/code/infrastructure/AWS/relayer-relay-packets.timer
+sudo systemctl link $HOME/code/infrastructure/AWS/relayer-relay-packets.service
+sudo systemctl enable --now relayer-relay-packets.timer
+sudo systemctl enable --now relayer-relay-packets.service
+```
+
+Update clients light clients every interval
+```
+sudo systemctl link $HOME/code/infrastructure/AWS/relayer-update-clients.timer
+sudo systemctl link $HOME/code/infrastructure/AWS/relayer-update-clients.service
+sudo systemctl enable --now relayer-update-clients.timer
+sudo systemctl enable --now relayer-update-clients.service
 ```
