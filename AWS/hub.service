@@ -1,7 +1,7 @@
 [Unit]
 After=network.target
 [Service]
-EnvironmentFile=/home/ubuntu/dymension/aws.env
+EnvironmentFile=/home/ubuntu/code/hub.env
 Type=simple
 Restart=always
 RestartSec=1
