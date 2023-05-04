@@ -242,7 +242,7 @@ follow the instructions on how to run a [DA light client](https://docs.celestia.
 
 Edit the configurations according to your needs.
 ```
-cp $HOME/code/dymension-rdk/scripts/shared.sh $HOME/code/rollapp.env && vim $HOME/code/rollapp.env
+cp $HOME/code/infrastructure/AWS/rollapp.env $HOME/code/rollapp.env && vim $HOME/code/rollapp.env
 ```
 
 Setup the sequencer node and register it to the hub.
