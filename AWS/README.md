@@ -245,6 +245,11 @@ Edit the configurations according to your needs, ensuring that your ROLLAPP_CHAI
 cp $HOME/code/infrastructure/AWS/rollapp.env $HOME/code/rollapp.env && vim $HOME/code/rollapp.env
 ```
 
+When running an EVM rollapp, you should uncomment the EVM rollapp section and comment out the vanilla rollapp section in the `shared.sh` file.
+```
+vim $HOME/code/dymension-rdk/scripts/shared.sh
+```
+
 Setup the sequencer node and register it to the hub.
 
 ```
@@ -280,11 +285,6 @@ Change the relevant arguments in relayer.env file for the relayer
 
 ```
 cp $HOME/code/infrastructure/AWS/relayer.env $HOME/code/relayer.env && vim $HOME/code/relayer.env
-```
-
-Uncomment the evm rollapp section and comment out the vannila rollapp section in the shared.sh
-```
-vim $HOME/code/dymension-rdk/scripts/shared.sh
 ```
 
 Run the relayer setup script
