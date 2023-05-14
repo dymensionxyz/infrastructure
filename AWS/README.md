@@ -240,9 +240,14 @@ follow the instructions on how to run a [DA light client](https://docs.celestia.
 
 ### Setup the node 
 
-Edit the configurations according to your needs.
+Edit the configurations according to your needs, ensuring that your ROLLAPP_CHAIN_ID is unique for the hub, and that LOG_FILE_PATH and ROLLAPP_CHAIN_DIR start with the correct home directory path.
 ```
-cp $HOME/code/dymension-rdk/scripts/shared.sh $HOME/code/rollapp.env && vim $HOME/code/rollapp.env
+cp $HOME/code/infrastructure/AWS/rollapp.env $HOME/code/rollapp.env && vim $HOME/code/rollapp.env
+```
+
+When running an EVM rollapp, you should uncomment the EVM rollapp section and comment out the vanilla rollapp section in the `shared.sh` file.
+```
+vim $HOME/code/dymension-rdk/scripts/shared.sh
 ```
 
 Setup the sequencer node and register it to the hub.
